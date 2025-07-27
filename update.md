@@ -21,7 +21,7 @@
   - Better handling of different image sizes and aspect ratios
   - Included commonly requested user settings for more flexibility
 
-### Demo workflow (Flux kontext + Nunchaku + ImaageStitch)
+### Demo workflow (Flux kontext + Nunchaku + ImageStitch)
 ![v2.7.0_ImageStitch](https://github.com/user-attachments/assets/d73531a2-afbe-4a38-9459-86d8d55fcc91)
 
 - Fixed background color handling across all nodes
