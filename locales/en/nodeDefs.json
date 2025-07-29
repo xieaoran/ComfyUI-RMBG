@@ -267,7 +267,7 @@
     "display_name": "Load Image Simple (RMBG) 🖼️",
     "inputs": {
       "image_path_or_URL": { "name": "Image Path or URL" },
-      "image": { "name": "Image" },
+      "image": { "name": "Image" }
     },
     "outputs": {
       "1": { "name": "WIDTH" },
