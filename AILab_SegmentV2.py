@@ -210,7 +210,9 @@ class SegmentV2:
             sam_key = (sam_info["model_type"], sam_ckpt_path, device)
             if sam_key not in self.sam_model_cache:
                 try:
-                    sam = sam_model_registry[sam_info["model_type"]](checkpoint=sam_ckpt_path)
+                    sam = sam_model_registry[sam_info["model_type"]]()
+                    state_dict = torch.load(sam_ckpt_path, map_location="cpu")
+                    sam.load_state_dict(state_dict, strict=False)
                     sam.to(device)
                     self.sam_model_cache[sam_key] = SamPredictor(sam)
                 except RuntimeError as e:
