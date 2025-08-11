@@ -6,7 +6,7 @@ A ComfyUI custom node designed for advanced image background removal and object,
 - **2025/08/11**: Update ComfyUI-RMBG to **v2.8.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v280-20250811) )
 ![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
 
-  - Added `SAM2Segment`, `SAM2SegmentDiscovery`, and `SAM2SegmentDiscoveryAdv` nodes for text-prompted segmentation with the latest Facebook Research SAM2 technology.
+  - Added `SAM2Segment`, node for text-prompted segmentation with the latest Facebook Research SAM2 technology.
   - Enhanced color widget support across all nodes
   
 - **2025/08/06**: Update ComfyUI-RMBG to **v2.7.1** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v271-20250806) )
@@ -383,3 +383,4 @@ If this custom node helps you or you like my work, please give me ⭐ on this re
 
 ## License
 GPL-3.0 License
+
