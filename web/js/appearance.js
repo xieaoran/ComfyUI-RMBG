@@ -17,6 +17,9 @@ const NODE_COLORS = {
     "FashionSegmentAccessories": "segment",
     "FashionSegmentClothing": "segment",
     "BiRefNetRMBG": "segment",
+    "SAM2Segment": "segment",
+    "SAM2SegmentDiscovery": "segment",
+    "SAM2SegmentDiscoveryAdv": "segment",
 
     // Utility nodes
     "AILab_LoadImage": "utility",
