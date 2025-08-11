@@ -1,16 +1,15 @@
 # ComfyUI-RMBG
 
-A ComfyUI custom node designed for advanced image background removal and object, face, clothes, and fashion segmentation, utilizing multiple models including RMBG-2.0, INSPYRENET, BEN, BEN2, BiRefNet-HR, SAM, and GroundingDINO.
+A ComfyUI custom node designed for advanced image background removal and object, face, clothes, and fashion segmentation, utilizing multiple models including RMBG-2.0, INSPYRENET, BEN, BEN2, BiRefNet-HR, SAM, SAM2 and GroundingDINO.
 
 ## News & Updates
 - **2025/08/11**: Update ComfyUI-RMBG to **v2.8.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v280-20250811) )
 ![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
 
-  - Added `SAM2Segment` node for text-prompted segmentation with the latest Facebook Research SAM2 technology.
+  - Added `SAM2Segment`, `SAM2SegmentDiscovery`, and `SAM2SegmentDiscoveryAdv` nodes for text-prompted segmentation with the latest Facebook Research SAM2 technology.
   - Enhanced color widget support across all nodes
   
 - **2025/08/06**: Update ComfyUI-RMBG to **v2.7.1** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v271-20250806) )
-- **2025/07/27**: Update ComfyUI-RMBG to **v2.7.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v270-20250727) )
 ![v2.7.0_ImageStitch](https://github.com/user-attachments/assets/3f31fe25-a453-4f86-bf3d-dc12a8affd39)
 
   - Enhanced LoadImage into three distinct nodes to meet different needs, all supporting direct image loading from local paths or URLs
@@ -18,15 +17,19 @@ A ComfyUI custom node designed for advanced image background removal and object,
   - Fixed background color handling issues reported by users
 
 - **2025/07/15**: Update ComfyUI-RMBG to **v2.6.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v260-20250715) )
+
 ![ReferenceLatentMaskr](https://github.com/user-attachments/assets/756641b7-0833-4fe0-b32f-2b848a14574e)
 
   - Added `Kontext Refence latent Mask` node, Which uses a reference latent and mask for precise region conditioning.
 
 - **2025/07/11**: Update ComfyUI-RMBG to **v2.5.2** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v252-20250711) )
+
 ![V 2 5 2](https://github.com/user-attachments/assets/4b41887a-0d8a-4a5a-9128-1e866f410b60)
 
 - **2025/07/07**: Update ComfyUI-RMBG to **v2.5.1** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v251-20250707) )
+
 - **2025/07/01**: Update ComfyUI-RMBG to **v2.5.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v250-20250701) )
+
 ![mask_overlay](https://github.com/user-attachments/assets/d82abb5a-9702-4d21-a5cf-e6776c7b4c06)
 
   - Added `MaskOverlay`, `ObjectRemover`, `ImageMaskResize` new nodes.
@@ -156,6 +159,10 @@ https://github.com/user-attachments/assets/7faa00d3-bbe2-42b8-95ed-2c830a1ff04f
   - High-precision segmentation with SAM
   - Flexible parameter controls
 
+- SAM2 Segmentation
+  - Text-prompted segmentation with the latest SAM2 models (Tiny/Small/Base+/Large)
+  - Automatic model download on first use, with manual download option
+
 ![RMBG Demo](https://github.com/user-attachments/assets/f3ffa3c4-5a21-4c0c-a078-b4ffe681c4c4)
 
 ## Installation
@@ -165,6 +172,9 @@ install requirment.txt in the ComfyUI-RMBG folder
   ```bash
   ./ComfyUI/python_embeded/python -m pip install -r requirements.txt
   ```
+> [!TIP]
+> Note: If your environment cannot install dependencies with the system Python, you can use ComfyUI's embedded Python instead.
+> Example (embedded Python): `./ComfyUI/python_embeded/python.exe -m pip install --no-user --no-cache-dir -r requirements.txt`
 
 ### Method 2. Clone this repository to your ComfyUI custom_nodes folder:
   ```bash
@@ -196,6 +206,7 @@ install requirment.txt in the ComfyUI-RMBG folder
 - Manually download the BEN2 model by visiting the [link](https://huggingface.co/1038lab/BEN2), then download the files and place them in the `/ComfyUI/models/RMBG/BEN2` folder.
 - Manually download the BiRefNet-HR by visiting the [link](https://huggingface.co/1038lab/BiRefNet_HR), then download the files and place them in the `/ComfyUI/models/RMBG/BiRefNet-HR` folder.
 - Manually download the SAM models by visiting the [link](https://huggingface.co/1038lab/sam), then download the files and place them in the `/ComfyUI/models/SAM` folder.
+- Manually download the SAM2 models by visiting the [link](https://huggingface.co/1038lab/sam2), then download the files (e.g., `sam2.1_hiera_tiny.safetensors`, `sam2.1_hiera_small.safetensors`, `sam2.1_hiera_base_plus.safetensors`, `sam2.1_hiera_large.safetensors`) and place them in the `/ComfyUI/models/sam2` folder.
 - Manually download the GroundingDINO models by visiting the [link](https://huggingface.co/1038lab/GroundingDINO), then download the files and place them in the `/ComfyUI/models/grounding-dino` folder.
 - Manually download the Clothes Segment model by visiting the [link](https://huggingface.co/1038lab/segformer_clothes), then download the files and place them in the `/ComfyUI/models/RMBG/segformer_clothes` folder.
 - Manually download the Fashion Segment model by visiting the [link](https://huggingface.co/1038lab/segformer_fashion), then download the files and place them in the `/ComfyUI/models/RMBG/segformer_fashion` folder.
@@ -302,6 +313,12 @@ SAM is a powerful model for object detection and segmentation, offering:
 - Output with background
 - Batch output for video
 
+## SAM2
+SAM2 is the latest segmentation model family designed for efficient, high-quality text-prompted segmentation:
+- Multiple sizes: Tiny, Small, Base+, Large
+- Optimized inference with strong accuracy
+- Automatic download on first use; manual placement supported in `ComfyUI/models/sam2`
+
 ## GroundingDINO
 GroundingDINO is a model for text-prompted object detection and segmentation, offering:
 - High accuracy in complex environments
@@ -328,15 +345,17 @@ GroundingDINO is a model for text-prompted object detection and segmentation, of
 - ComfyUI
 - Python 3.10+
 - Required packages (automatically installed):
-  - torch>=2.0.0
-  - torchvision>=0.15.0
-  - Pillow>=9.0.0
-  - numpy>=1.22.0
   - huggingface-hub>=0.19.0
-  - tqdm>=4.65.0
-  - transformers>=4.35.0
-  - transparent-background>=1.2.4
+  - transparent-background>=1.1.2
+  - segment-anything>=1.0
+  - groundingdino-py>=0.4.0
   - opencv-python>=4.7.0
+  - onnxruntime>=1.15.0
+  - onnxruntime-gpu>=1.15.0
+  - protobuf>=3.20.2,<6.0.0
+  - hydra-core>=1.3.0
+  - omegaconf>=2.3.0
+  - iopath>=0.1.9
 
 ## Credits
 - RMBG-2.0: https://huggingface.co/briaai/RMBG-2.0
@@ -364,5 +383,3 @@ If this custom node helps you or you like my work, please give me ⭐ on this re
 
 ## License
 GPL-3.0 License
-
-
