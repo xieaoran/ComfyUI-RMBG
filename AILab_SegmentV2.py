@@ -100,8 +100,6 @@ def apply_background_color(image: Image.Image, mask_image: Image.Image,
             hex_color = hex_color.lstrip('#')
             r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
             return (r, g, b, 255)
-        params = {"background_color": background_color}
-        background_color = params.get("background_color", "#222222")
         rgba = hex_to_rgba(background_color)
         bg_image = Image.new('RGBA', image.size, rgba)
         composite_image = Image.alpha_composite(bg_image, rgba_image)
