@@ -1,4 +1,15 @@
 # ComfyUI-RMBG Update Log
+## V2.8.0 (2025/08/11)
+- Added SAM2 segmentation nodes with latest Facebook Research SAM2 technology
+![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
+  - `SAM2Segment`: Text-prompted segmentation with 4 model variants (Tiny/Small/Base Plus/Large)
+  - Improved accuracy and faster processing compared to SAM V1
+  - FP16/FP32 precision support and better edge detection
+- Enhanced color widget support across all nodes
+- Fixed color picker functionality and improved color handling consistency
+- Updated SAM2 model integration with optimized memory usage and batch processing
+- Bug Fixed
+
 ## V2.7.1 (2025/08/06)
 - Bug fixes and improved code compatibility
 ## V2.7.0 (2025/07/27)
@@ -500,4 +511,5 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
