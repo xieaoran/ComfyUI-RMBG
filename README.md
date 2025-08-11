@@ -3,6 +3,12 @@
 A ComfyUI custom node designed for advanced image background removal and object, face, clothes, and fashion segmentation, utilizing multiple models including RMBG-2.0, INSPYRENET, BEN, BEN2, BiRefNet-HR, SAM, and GroundingDINO.
 
 ## News & Updates
+- **2025/08/11**: Update ComfyUI-RMBG to **v2.8.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v280-20250811) )
+![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
+
+  - Added `SAM2Segment` node for text-prompted segmentation with the latest Facebook Research SAM2 technology.
+  - Enhanced color widget support across all nodes
+  
 - **2025/08/06**: Update ComfyUI-RMBG to **v2.7.1** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v271-20250806) )
 - **2025/07/27**: Update ComfyUI-RMBG to **v2.7.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v270-20250727) )
 ![v2.7.0_ImageStitch](https://github.com/user-attachments/assets/3f31fe25-a453-4f86-bf3d-dc12a8affd39)
@@ -358,4 +364,5 @@ If this custom node helps you or you like my work, please give me ⭐ on this re
 
 ## License
 GPL-3.0 License
+
 
