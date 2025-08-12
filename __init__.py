@@ -3,7 +3,7 @@ import sys
 import os
 import importlib.util
 
-__version__ = "2.7.0"
+__version__ = "2.8.1"
 
 # Add module directory to Python path
 current_dir = Path(__file__).parent
@@ -51,3 +51,4 @@ __all__ = [
 ]
 # print(f'\033[34m[ComfyUI-RMBG] v{__version__} \033[92mLoaded\033[0m') 
 print(f'\033[34m[ComfyUI-RMBG]\033[0m v\033[93m{__version__}\033[0m | \033[93m{len(NODE_CLASS_MAPPINGS)} nodes\033[0m \033[92mLoaded\033[0m') 
+
