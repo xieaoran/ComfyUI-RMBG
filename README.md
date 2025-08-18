@@ -1,12 +1,16 @@
 # ComfyUI-RMBG
 
-A sophisticated ComfyUI custom node engineered for advanced image background removal and precise segmentation of objects, faces, clothing, and fashion elements. This tool leverages a diverse array of models, including RMBG-2.0, INSPYRENET, BEN, BEN2, BiRefNet models, SAM, SAM2 and GroundingDINO, while also incorporating a new feature for real-time background replacement and enhanced edge detection for improved accuracy.
+A sophisticated ComfyUI custom node engineered for advanced image background removal and precise segmentation of objects, faces, clothing, and fashion elements. This tool leverages a diverse array of models, including RMBG-2.0, INSPYRENET, BEN, BEN2, BiRefNet, SDMatte models, SAM, SAM2 and GroundingDINO, while also incorporating a new feature for real-time background replacement and enhanced edge detection for improved accuracy.
 
 ## News & Updates
+- **2025/08/18**: Update ComfyUI-RMBG to **v2.9.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v290-20250818) )
+![v2 9 0](https://github.com/user-attachments/assets/05a5d41e-a73c-40cc-a4cc-c10380ecc425)
+  - Added `SDMatte Matting` node
+
 - **2025/08/11**: Update ComfyUI-RMBG to **v2.8.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v280-20250811) )
 ![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
 
-  - Added `SAM2Segment`, node for text-prompted segmentation with the latest Facebook Research SAM2 technology.
+  - Added `SAM2Segment` node for text-prompted segmentation with the latest Facebook Research SAM2 technology.
   - Enhanced color widget support across all nodes
   
 - **2025/08/06**: Update ComfyUI-RMBG to **v2.7.1** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v271-20250806) )
@@ -211,6 +215,7 @@ install requirment.txt in the ComfyUI-RMBG folder
 - Manually download the Clothes Segment model by visiting the [link](https://huggingface.co/1038lab/segformer_clothes), then download the files and place them in the `/ComfyUI/models/RMBG/segformer_clothes` folder.
 - Manually download the Fashion Segment model by visiting the [link](https://huggingface.co/1038lab/segformer_fashion), then download the files and place them in the `/ComfyUI/models/RMBG/segformer_fashion` folder.
 - Manually download BiRefNet models by visiting the [link](https://huggingface.co/1038lab/BiRefNet), then download the files and place them in the `/ComfyUI/models/RMBG/BiRefNet` folder.
+- Manually download SDMatte safetensors models by visiting the [link](https://huggingface.co/1038lab/SDMatte), then download the files and place them in the `/ComfyUI/models/RMBG/SDMatte` folder.
 
 ## Usage  
 ### RMBG Node
@@ -357,6 +362,20 @@ GroundingDINO is a model for text-prompted object detection and segmentation, of
   - omegaconf>=2.3.0
   - iopath>=0.1.9
 
+### SDMatte models (manual download)
+- Auto-download on first run to `models/RMBG/SDMatte/`
+- If network restricted, place weights manually:
+  - `models/RMBG/SDMatte/SDMatte.safetensors` (standard) or `SDMatte_plus.safetensors` (plus)
+  - Components (config files) are auto-downloaded; if needed, mirror the structure from the Hugging Face repo to `models/RMBG/SDMatte/` (`scheduler/`, `text_encoder/`, `tokenizer/`, `unet/`, `vae/`)
+
+## Troubleshooting (short)
+- 401 error when initializing GroundingDINO / missing `models/sam2`:
+  - Delete `%USERPROFILE%\.cache\huggingface\token` (and `%USERPROFILE%\.huggingface\token` if present)
+  - Ensure no `HF_TOKEN`/`HUGGINGFACE_TOKEN` env vars are set
+  - Re-run; public repos download anonymously (no login required)
+- Preview shows "Required input is missing: images":
+  - Ensure image outputs are connected and upstream nodes ran successfully
+
 ## Credits
 - RMBG-2.0: https://huggingface.co/briaai/RMBG-2.0
 - INSPYRENET: https://github.com/plemeri/InSPyReNet
@@ -366,6 +385,7 @@ GroundingDINO is a model for text-prompted object detection and segmentation, of
 - SAM: https://huggingface.co/facebook/sam-vit-base
 - GroundingDINO: https://github.com/IDEA-Research/GroundingDINO
 - Clothes Segment: https://huggingface.co/mattmdjaga/segformer_b2_clothes
+- SDMatte: https://github.com/vivoCameraResearch/SDMatte
 
 - Created by: [AILab](https://github.com/1038lab)
 
@@ -383,5 +403,3 @@ If this custom node helps you or you like my work, please give me ⭐ on this re
 
 ## License
 GPL-3.0 License
-
-
