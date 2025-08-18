@@ -2,6 +2,8 @@
 ## V2.9.0 (2025/08/18)
 - Added `SDMatte Matting` node **(User request [#99](https://github.com/1038lab/ComfyUI-RMBG/issues/99) )**
 ![v2 9 0](https://github.com/user-attachments/assets/05a5d41e-a73c-40cc-a4cc-c10380ecc425)
+![v2 9 0](https://github.com/user-attachments/assets/5e74657d-8fa7-4987-8f8a-949b0f7aaa24)
+
 - Optional `mask` input; if omitted and the input image has an alpha channel, the alpha is used as the mask
 - Unified explicit bilinear resizing for inputs/outputs; improved consistency with other nodes
 - Inference optimizations: `torch.inference_mode`, CUDA FP16 autocast, memory cleanup, and explicit GPU fallback messaging
@@ -518,6 +520,7 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
 
 
