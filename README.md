@@ -4,7 +4,7 @@ A sophisticated ComfyUI custom node engineered for advanced image background rem
 
 ## News & Updates
 - **2025/08/18**: Update ComfyUI-RMBG to **v2.9.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v290-20250818) )
-![v2 9 0](https://github.com/user-attachments/assets/05a5d41e-a73c-40cc-a4cc-c10380ecc425)
+![v2 9 0](https://github.com/user-attachments/assets/de4398ab-ce3c-4c3e-af0b-d82c2a8c8481)
   - Added `SDMatte Matting` node
 
 - **2025/08/11**: Update ComfyUI-RMBG to **v2.8.0** ( [update.md](https://github.com/1038lab/ComfyUI-RMBG/blob/main/update.md#v280-20250811) )
@@ -403,3 +403,4 @@ If this custom node helps you or you like my work, please give me ⭐ on this re
 
 ## License
 GPL-3.0 License
+
