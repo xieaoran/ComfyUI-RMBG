@@ -229,6 +229,24 @@
       "2": { "name": "MASK IMAGE" }
     }
   },
+  "AILab_SAM2Segment": {
+    "display_name": "SAM2Segment (RMBG)",
+    "inputs": {
+      "image": { "name": "Image" },
+      "prompt": { "name": "Prompt" },
+      "sam_model": { "name": "SAM Model" },
+      "dino_model": { "name": "DINO Model" },
+      "threshold": { "name": "Threshold" },
+      "mask_blur": { "name": "Mask Blur" },
+      "mask_offset": { "name": "Mask Offset" },
+      "invert_output": { "name": "Invert Output" },
+      "background": { "name": "Background" },
+      "background_color": { "name": "Background Color" }
+    },
+    "outputs": {
+      "2": { "name": "MASK IMAGE" }
+    }
+  },
   "AILab_Preview": {
     "display_name": "Image / Mask Preview (RMBG) 🖼️🎭",
     "inputs": {
@@ -460,6 +478,28 @@
       "0": { "name": "CONDITIONING" },
       "1": { "name": "LATENT" },
       "2": { "name": "MASK" }
+    }
+  },
+  "AILab_SDMatte": {
+    "display_name": "SDMatte Matting (RMBG) 🖼️🎭",
+    "inputs": {
+      "image": { "name": "Image" },
+      "mask": { "name": "Mask" },
+      "model_path": { "name": "Model" },
+      "device": { "name": "Device" },
+      "process_res": { "name": "Processing Resolution" },
+      "transparent_object": { "name": "Transparent Object" },
+      "mask_refine": { "name": "Mask Refine" },
+      "sensitivity": { "name": "Sensitivity" },
+      "mask_blur": { "name": "Mask Blur" },
+      "mask_offset": { "name": "Mask Offset" },
+      "invert_output": { "name": "Invert Output" },
+      "background": { "name": "Background" },
+      "background_color": { "name": "Background Color" }
+    },
+    "outputs": {
+      "0": { "name": "IMAGE" },
+      "1": { "name": "MASK" }
     }
   }
 } 

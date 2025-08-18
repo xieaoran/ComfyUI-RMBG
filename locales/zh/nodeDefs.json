@@ -228,6 +228,24 @@
      "2": { "name": "遮罩图像" }
    }
  },
+ "AILab_SAM2Segment": {
+   "display_name": "SAM2Segment (RMBG)",
+   "inputs": {
+     "image": { "name": "图像" },
+     "prompt": { "name": "提示" },  
+     "sam_model": { "name": "SAM模型" },
+     "dino_model": { "name": "DINO模型" },
+     "threshold": { "name": "阈值" },
+     "mask_blur": { "name": "遮罩模糊" },
+     "mask_offset": { "name": "遮罩偏移" },
+     "invert_output": { "name": "反转输出" },
+     "background": { "name": "背景类型" },
+     "background_color": { "name": "背景颜色" }
+   },
+   "outputs": {
+     "2": { "name": "遮罩图像" }
+   }
+ },
  "AILab_Preview": {
    "display_name": "图像/遮罩 预览 (RMBG) 🖼️🎭",
    "inputs": {
@@ -458,6 +476,28 @@
      "0": { "name": "条件" },
      "1": { "name": "latant" },
      "2": { "name": "遮罩" }
+   }
+ },
+ "AILab_SDMatte": {
+   "display_name": "SDMatte Matting (RMBG) 🖼️🎭",
+   "inputs": {
+     "image": { "name": "图像" },
+     "mask": { "name": "遮罩" },
+     "model_path": { "name": "模型路径" },
+     "device": { "name": "设备" },
+     "process_res": { "name": "处理分辨率" },
+     "transparent_object": { "name": "透明对象" },
+     "mask_refine": { "name": "遮罩细化" },
+     "sensitivity": { "name": "灵敏度" },
+     "mask_blur": { "name": "遮罩模糊" },
+     "mask_offset": { "name": "遮罩偏移" },
+     "invert_output": { "name": "反转输出" },
+     "background": { "name": "背景" },
+     "background_color": { "name": "背景颜色" }
+   },
+   "outputs": {
+     "0": { "name": "图像" },
+     "1": { "name": "遮罩" }
    }
  }
 }

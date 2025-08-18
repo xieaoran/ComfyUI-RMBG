@@ -228,6 +228,24 @@
       "2": { "name": "IMAGE MASQUE" }
     }
   },
+  "AILab_SAM2Segment": {
+    "display_name": "SAM2Segment (RMBG)",
+    "inputs": {
+      "image": { "name": "Image" },
+      "prompt": { "name": "Invite" }, 
+      "sam_model": { "name": "Modèle SAM" },
+      "dino_model": { "name": "Modèle DINO" },
+      "threshold": { "name": "Seuil" },
+      "mask_blur": { "name": "Flou du masque" },
+      "mask_offset": { "name": "Décalage du masque" },
+      "invert_output": { "name": "Inverser la sortie" },  
+      "background": { "name": "Arrière-plan" },
+      "background_color": { "name": "Couleur de fond" }
+    },
+    "outputs": {
+      "2": { "name": "IMAGE MASQUE" }
+    }
+  },
   "AILab_Preview": {
     "display_name": "Aperçu de l'image/mask (RMBG) 🖼️🎭",
     "inputs": {
@@ -458,6 +476,28 @@
       "0": { "name": "条件" },
       "1": { "name": "latant" },
       "2": { "name": "遮罩" }
+    }
+  },
+  "AILab_SDMatte": {
+    "display_name": "SDMatte Matting (RMBG) 🖼️🎭",
+    "inputs": {
+      "image": { "name": "Image" },
+      "mask": { "name": "Masque" },
+      "model_path": { "name": "Chemin du modèle" },
+      "device": { "name": "Appareil" },
+      "process_res": { "name": "Résolution de traitement" },
+      "transparent_object": { "name": "Objet transparent" },
+      "mask_refine": { "name": "Amélioration du masque" },
+      "sensitivity": { "name": "Sensibilité" },
+      "mask_blur": { "name": "Flou du masque" },
+      "mask_offset": { "name": "Décalage du masque" },
+      "invert_output": { "name": "Inverser la sortie" },
+      "background": { "name": "Arrière-plan" },
+      "background_color": { "name": "Couleur de fond" }
+    },
+    "outputs": {
+      "0": { "name": "Image" },
+      "1": { "name": "Masque" }
     }
   }
 }

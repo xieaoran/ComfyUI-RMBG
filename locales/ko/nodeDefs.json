@@ -227,6 +227,24 @@
     "outputs": {
       "2": { "name": "마스크 이미지" }
     }
+  },
+  "AILab_SAM2Segment": {
+    "display_name": "SAM2Segment (RMBG)",
+    "inputs": {
+      "image": { "name": "이미지" },
+      "prompt": { "name": "프롬프트" },
+      "sam_model": { "name": "SAM 모델" },
+      "dino_model": { "name": "DINO 모델" },
+      "threshold": { "name": "임계값" },
+      "mask_blur": { "name": "마스크 블러" },
+      "mask_offset": { "name": "마스크 오프셋" },
+      "invert_output": { "name": "출력 반전" },
+      "background": { "name": "배경" },
+      "background_color": { "name": "배경 색상" }
+    },
+    "outputs": {
+      "2": { "name": "마스크 이미지" }
+    }
   },  
   "AILab_Preview": {
     "display_name": "이미지/마스크 미리보기 (RMBG) 🖼️🎭",
@@ -460,5 +478,27 @@
       "1": { "name": "잠재" },
       "2": { "name": "마스크" }
     }
+  },
+  "AILab_SDMatte": {
+    "display_name": "SDMatte Matting (RMBG) 🖼️🎭",
+    "inputs": {
+      "image": { "name": "이미지" },
+      "mask": { "name": "마스크" },
+      "model_path": { "name": "모델 경로" },
+      "device": { "name": "장치" },
+      "process_res": { "name": "처리 해상도" },
+      "transparent_object": { "name": "투명 객체" },
+      "mask_refine": { "name": "마스크 강화" },
+      "sensitivity": { "name": "민감도" },
+      "mask_blur": { "name": "마스크 블러" },
+      "mask_offset": { "name": "마스크 오프셋" },
+      "invert_output": { "name": "출력 반전" },
+      "background": { "name": "배경" },
+      "background_color": { "name": "배경 색상" }
+    },
+    "outputs": {
+      "0": { "name": "이미지" },
+      "1": { "name": "마스크" }
+    }
   }
-} 
+}

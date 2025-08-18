@@ -235,6 +235,24 @@
       "mask": { "name": "マスク" }
     }
   },
+  "AILab_SAM2Segment": {
+    "display_name": "SAM2Segment (RMBG)",
+    "inputs": {
+      "image": { "name": "画像" },
+      "prompt": { "name": "プロンプト" }, 
+      "sam_model": { "name": "SAMモデル" },
+      "dino_model": { "name": "DINOモデル" },
+      "threshold": { "name": "しきい値" },
+      "mask_blur": { "name": "マスクぼかし" },
+      "mask_offset": { "name": "マスクオフセット" },
+      "invert_output": { "name": "出力を反転" },  
+      "background": { "name": "背景" },
+      "background_color": { "name": "背景色" }
+    },
+    "outputs": {
+      "2": { "name": "マスク画像" }
+    }
+  },
   "AILab_ImagePreview": {
     "display_name": "画像プレビュー (RMBG) 🖼️",
     "inputs": {
@@ -459,6 +477,28 @@
       "0": { "name": "条件" },
       "1": { "name": "潜伏" },
       "2": { "name": "マスク" }
+    }
+  },
+  "AILab_SDMatte": {
+    "display_name": "SDMatte Matting (RMBG) 🖼️🎭",
+    "inputs": {
+      "image": { "name": "画像" },
+      "mask": { "name": "マスク" },
+      "model_path": { "name": "モデルパス" },
+      "device": { "name": "デバイス" },
+      "process_res": { "name": "処理解像度" },
+      "transparent_object": { "name": "透明オブジェクト" },
+      "mask_refine": { "name": "マスク改善" },
+      "sensitivity": { "name": "感度" },
+      "mask_blur": { "name": "マスクぼかし" },
+      "mask_offset": { "name": "マスクオフセット" },
+      "invert_output": { "name": "出力を反転" },
+      "background": { "name": "背景" },
+      "background_color": { "name": "背景色" }
+    },
+    "outputs": {
+      "0": { "name": "画像" },
+      "1": { "name": "マスク" }
     }
   }
 }
