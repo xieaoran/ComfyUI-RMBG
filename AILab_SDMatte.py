@@ -1,7 +1,7 @@
 # ComfyUI-RMBG
 # This custom node for ComfyUI provides functionality for Object removal using SDMatte model.
 #
-# reference from https://github.com/vivoCameraResearch
+# reference from https://github.com/vivoCameraResearch/SDMatte
 # model: https://huggingface.co/1038lab/SDMatte
 #
 # This integration script follows GPL-3.0 License.
@@ -430,4 +430,5 @@ NODE_CLASS_MAPPINGS = {
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AILab_SDMatte": "SDMatte Matting (RMBG)",
+
 }
