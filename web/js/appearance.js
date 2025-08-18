@@ -42,6 +42,7 @@ const NODE_COLORS = {
     "AILab_ColorInput": "utility",
     "AILab_ImageMaskResize": "utility",
     "AILab_LamaRemover": "utility",
+    "AILab_SDMatte": "utility",
 };
 
 function setNodeColors(node, theme) {
