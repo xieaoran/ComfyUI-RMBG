@@ -1,4 +1,11 @@
 # ComfyUI-RMBG Update Log
+## V2.9.0 (2025/08/18)
+- Added `SDMatte Matting` node **(User request [#99](https://github.com/1038lab/ComfyUI-RMBG/issues/99) )**
+![v2 9 0](https://github.com/user-attachments/assets/05a5d41e-a73c-40cc-a4cc-c10380ecc425)
+- Optional `mask` input; if omitted and the input image has an alpha channel, the alpha is used as the mask
+- Unified explicit bilinear resizing for inputs/outputs; improved consistency with other nodes
+- Inference optimizations: `torch.inference_mode`, CUDA FP16 autocast, memory cleanup, and explicit GPU fallback messaging
+
 ## V2.8.0 (2025/08/11)
 - Added SAM2 segmentation nodes with latest Facebook Research SAM2 technology
 ![v2 8 0](https://github.com/user-attachments/assets/16c5a67c-1aec-4def-9aa2-db9dcf2354a8)
@@ -511,5 +518,6 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
 
