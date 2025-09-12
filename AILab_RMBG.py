@@ -1,4 +1,4 @@
-# ComfyUI-RMBG
+# ComfyUI-RMBG V2.9.1
 # This custom node for ComfyUI provides functionality for background removal using various models,
 # including RMBG-2.0, INSPYRENET, BEN, BEN2 and BIREFNET-HR. It leverages deep learning techniques
 # to process images and generate masks for background removal.
@@ -572,49 +572,51 @@ class RMBG:
                     handle_model_error(download_message)
                 print("Model files downloaded successfully")
             
-            for img in image:
-                mask = model_instance.process_image(img, model, params)
-                
+            model_type = AVAILABLE_MODELS[model]["type"]
+            
+            def _process_pair(img, mask):
                 if isinstance(mask, list):
                     masks = [m.convert("L") for m in mask if isinstance(m, Image.Image)]
-                    mask = masks[0] if masks else None
+                    mask_local = masks[0] if masks else None
                 elif isinstance(mask, Image.Image):
-                    mask = mask.convert("L")
-
-                mask_tensor = pil2tensor(mask)
-                mask_tensor = mask_tensor * (1 + (1 - params["sensitivity"]))
-                mask_tensor = torch.clamp(mask_tensor, 0, 1)
-                mask = tensor2pil(mask_tensor)
+                    mask_local = mask.convert("L")
+                else:
+                    mask_local = mask
+                
+                mask_tensor_local = pil2tensor(mask_local)
+                mask_tensor_local = mask_tensor_local * (1 + (1 - params["sensitivity"]))
+                mask_tensor_local = torch.clamp(mask_tensor_local, 0, 1)
+                mask_img_local = tensor2pil(mask_tensor_local)
                 
                 if params["mask_blur"] > 0:
-                    mask = mask.filter(ImageFilter.GaussianBlur(radius=params["mask_blur"]))
+                    mask_img_local = mask_img_local.filter(ImageFilter.GaussianBlur(radius=params["mask_blur"]))
                 
                 if params["mask_offset"] != 0:
                     if params["mask_offset"] > 0:
                         for _ in range(params["mask_offset"]):
-                            mask = mask.filter(ImageFilter.MaxFilter(3))
+                            mask_img_local = mask_img_local.filter(ImageFilter.MaxFilter(3))
                     else:
                         for _ in range(-params["mask_offset"]):
-                            mask = mask.filter(ImageFilter.MinFilter(3))
+                            mask_img_local = mask_img_local.filter(ImageFilter.MinFilter(3))
                 
                 if params["invert_output"]:
-                    mask = Image.fromarray(255 - np.array(mask))
-
-                img_tensor = torch.from_numpy(np.array(tensor2pil(img))).permute(2, 0, 1).unsqueeze(0) / 255.0
-                mask_tensor = torch.from_numpy(np.array(mask)).unsqueeze(0).unsqueeze(0) / 255.0
-
-                orig_image = tensor2pil(img)
+                    mask_img_local = Image.fromarray(255 - np.array(mask_img_local))
+                
+                img_tensor_local = torch.from_numpy(np.array(tensor2pil(img))).permute(2, 0, 1).unsqueeze(0) / 255.0
+                mask_tensor_b1hw = torch.from_numpy(np.array(mask_img_local)).unsqueeze(0).unsqueeze(0) / 255.0
+                
+                orig_image_local = tensor2pil(img)
                 
                 if params.get("refine_foreground", False):
-                    refined_fg = refine_foreground(img_tensor, mask_tensor)
-                    refined_fg = tensor2pil(refined_fg[0].permute(1, 2, 0))
-                    r, g, b = refined_fg.split()
-                    foreground = Image.merge('RGBA', (r, g, b, mask))
+                    refined_fg_local = refine_foreground(img_tensor_local, mask_tensor_b1hw)
+                    refined_fg_local = tensor2pil(refined_fg_local[0].permute(1, 2, 0))
+                    r, g, b = refined_fg_local.split()
+                    foreground_local = Image.merge('RGBA', (r, g, b, mask_img_local))
                 else:
-                    orig_rgba = orig_image.convert("RGBA")
-                    r, g, b, _ = orig_rgba.split()
-                    foreground = Image.merge('RGBA', (r, g, b, mask))
-
+                    orig_rgba_local = orig_image_local.convert("RGBA")
+                    r, g, b, _ = orig_rgba_local.split()
+                    foreground_local = Image.merge('RGBA', (r, g, b, mask_img_local))
+                
                 if params["background"] == "Color":
                     def hex_to_rgba(hex_color):
                         hex_color = hex_color.lstrip('#')
@@ -628,14 +630,29 @@ class RMBG:
                         return (r, g, b, a)
                     background_color = params.get("background_color", "#222222")
                     rgba = hex_to_rgba(background_color)
-                    bg_image = Image.new('RGBA', orig_image.size, rgba)
-                    composite_image = Image.alpha_composite(bg_image, foreground)
+                    bg_image = Image.new('RGBA', orig_image_local.size, rgba)
+                    composite_image = Image.alpha_composite(bg_image, foreground_local)
                     processed_images.append(pil2tensor(composite_image.convert("RGB")))
                 else:
-                    processed_images.append(pil2tensor(foreground))
+                    processed_images.append(pil2tensor(foreground_local))
                 
-                processed_masks.append(pil2tensor(mask))
-
+                processed_masks.append(pil2tensor(mask_img_local))
+            
+            if model_type in ("rmbg", "ben2"):
+                images_list = [img for img in image]
+                chunk_size = 4
+                for start in range(0, len(images_list), chunk_size):
+                    batch_imgs = images_list[start:start + chunk_size]
+                    masks = model_instance.process_image(batch_imgs, model, params)
+                    if isinstance(masks, Image.Image):
+                        masks = [masks]
+                    for img_item, mask_item in zip(batch_imgs, masks):
+                        _process_pair(img_item, mask_item)
+            else:
+                for img in image:
+                    mask = model_instance.process_image(img, model, params)
+                    _process_pair(img, mask)
+            
             mask_images = []
             for mask_tensor in processed_masks:
                 mask_image = mask_tensor.reshape((-1, 1, mask_tensor.shape[-2], mask_tensor.shape[-1])).movedim(1, -1).expand(-1, -1, -1, 3)
