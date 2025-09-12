@@ -9,11 +9,16 @@
 import { app } from "/scripts/app.js";
 
 const getContrastTextColor = (hexColor) => {
+    if (typeof hexColor !== 'string' || !/^#?[0-9a-fA-F]{6}$/.test(hexColor)) {
+        return '#cccccc'; // fallback text color
+    }
+
     const hex = hexColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
     return luminance > 0.5 ? '#333333' : '#cccccc';
 };
 
@@ -24,7 +29,7 @@ const AILabColorWidget = {
         widget.name = key;
         widget.type = 'COLOR';
         widget.options = { default: '#222222' };
-        widget.value = val || '#222222';
+        widget.value = typeof val === 'string' ? val : '#222222'; // validate incoming value
 
         widget.draw = function (ctx, node, widgetWidth, widgetY, height) {
             const hide = this.type !== 'COLOR' && app.canvas.ds.scale > 0.5;
@@ -75,8 +80,8 @@ const AILabColorWidget = {
                     picker.value = this.value;
 
                     picker.style.position = 'absolute';
-                    picker.style.left = '999999px';
-                    picker.style.top = '999999px';
+                    picker.style.left = '-9999px';
+                    picker.style.top = '-9999px';
 
                     document.body.appendChild(picker);
 
@@ -110,7 +115,7 @@ app.registerExtension({
             COLOR: (node, inputName, inputData) => {
                 return {
                     widget: node.addCustomWidget(
-                        AILabColorWidget.COLOR(inputName, inputData[1]?.default || '#222222')
+                        AILabColorWidget.COLOR(inputName, inputData?.[1]?.default || '#222222')
                     ),
                     minWidth: 150,
                     minHeight: 32,
