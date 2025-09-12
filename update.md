@@ -10,7 +10,7 @@
   - The `LoadImageAdvanced` node now outputs the embedded generation parameters from AI-generated PNG files (e.g., prompts, model, seed).
   - This allows for easy workflow replication by connecting the metadata directly to text inputs.
 
-- Enhanced the RMBG node to optimize batch processing of images and videos, **(User request [#99](https://github.com/1038lab/ComfyUI-RMBG/issues/100) )**
+- Enhanced the RMBG node to optimize batch processing of images and videos, **(User request [#100](https://github.com/1038lab/ComfyUI-RMBG/issues/100) )**
 
 - Reconstructed the `ColorWidget` to improve stability and prevent potential freezes in certain ComfyUI configurations.
 ## V2.9.0 (2025/08/18)
@@ -534,6 +534,7 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
 
 
