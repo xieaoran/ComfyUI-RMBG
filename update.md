@@ -1,5 +1,6 @@
 # ComfyUI-RMBG Update Log
 ## V2.9.1 (2025/09/12)
+![v2.9.1](https://github.com/user-attachments/assets/9b6c3e6c-5866-4807-91ba-669eb7efc52b)
 - Refactored `LoadImage` & `LoadImageAdvanced` Nodes
   - Reworked resizing logic for more powerful and intuitive control.
   - New execution priority: `megapixels` has the highest priority, otherwise `size` and `scale_by` now work together in a pipeline.
@@ -533,6 +534,7 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
 
 
