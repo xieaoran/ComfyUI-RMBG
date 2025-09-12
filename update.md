@@ -1,4 +1,17 @@
 # ComfyUI-RMBG Update Log
+## V2.9.1 (2025/09/12)
+- Refactored `LoadImage` & `LoadImageAdvanced` Nodes
+  - Reworked resizing logic for more powerful and intuitive control.
+  - New execution priority: `megapixels` has the highest priority, otherwise `size` and `scale_by` now work together in a pipeline.
+  - Improved image quality by calculating the final target size first and performing only a single `resize` operation to prevent quality loss.
+
+- Added `METADATA_TEXT` Output to `LoadImageAdvanced`
+  - The `LoadImageAdvanced` node now outputs the embedded generation parameters from AI-generated PNG files (e.g., prompts, model, seed).
+  - This allows for easy workflow replication by connecting the metadata directly to text inputs.
+
+- Enhanced the RMBG node to optimize batch processing of images and videos, **(User request [#99](https://github.com/1038lab/ComfyUI-RMBG/issues/100) )**
+
+- Reconstructed the `ColorWidget` to improve stability and prevent potential freezes in certain ComfyUI configurations.
 ## V2.9.0 (2025/08/18)
 - Added `SDMatte Matting` node **(User request [#99](https://github.com/1038lab/ComfyUI-RMBG/issues/99) )**
 ![v2 9 0](https://github.com/user-attachments/assets/05a5d41e-a73c-40cc-a4cc-c10380ecc425)
@@ -520,6 +533,7 @@ https://github.com/user-attachments/assets/259220d3-c148-4030-93d6-c17dd5bccee1
 - Model cache is checked before each operation
 - Memory is automatically cleaned when switching models
 - Video processing supports various formats and maintains quality
+
 
 
 
