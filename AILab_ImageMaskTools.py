@@ -1,4 +1,4 @@
-# ComfyUI-RMBG v2.7.0
+# ComfyUI-RMBG
 #
 # This node facilitates background removal using various models, including RMBG-2.0, INSPYRENET, BEN, BEN2, and BIREFNET-HR.
 # It utilizes advanced deep learning techniques to process images and generate accurate masks for background removal.
@@ -603,25 +603,24 @@ class AILab_BaseImageLoader:
         try:
             import requests
             from io import BytesIO
-            
+
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
-            
+
             response = requests.get(url, stream=True, timeout=10, headers=headers)
             if response.status_code != 200:
                 raise ValueError(f"Failed to download image from URL: {url}, status code: {response.status_code}")
-                
             return Image.open(BytesIO(response.content))
+
         except Exception as e:
             print(f"Error downloading image from URL: {str(e)}")
             raise e
 
     def get_image(self, image_path_or_URL="", image=""):
-        """Get image from path, URL or selected file"""
         if not image_path_or_URL and (not image or image == ""):
             return None
-            
+
         if image_path_or_URL:
             if image_path_or_URL.startswith(('http://', 'https://')):
                 return self.download_image(image_path_or_URL)
@@ -638,13 +637,25 @@ class AILab_BaseImageLoader:
         else:
             image_path = folder_paths.get_annotated_filepath(image)
             return Image.open(image_path)
-    
+
+    def get_metadata(self, img):
+        metadata_text = "No metadata found"
+        try:
+            if hasattr(img, 'text') and 'parameters' in img.text:
+                metadata_text = img.text['parameters']
+            elif hasattr(img, 'info') and 'parameters' in img.info:
+                metadata_text = img.info['parameters']
+            elif hasattr(img, 'text') and img.text:
+                 metadata_text = "\n".join([f"{k}: {v}" for k, v in img.text.items()])
+        except Exception as e:
+            print(f"Could not read metadata: {e}")
+        return metadata_text
+
     @classmethod
     def calculate_hash(cls, image_path_or_URL="", image=""):
-        """Calculate hash for IS_CHANGED method"""
         if not image_path_or_URL and (not image or image == ""):
             return "no_input"
-            
+
         if image_path_or_URL:
             try:
                 if image_path_or_URL.startswith(('http://', 'https://')):
@@ -659,7 +670,6 @@ class AILab_BaseImageLoader:
                         file_path = os.path.join(input_dir, image_path_or_URL)
                         if not os.path.isfile(file_path):
                             return None
-                    
                     m = hashlib.sha256()
                     with open(file_path, 'rb') as f:
                         m.update(f.read())
@@ -671,49 +681,131 @@ class AILab_BaseImageLoader:
             m = hashlib.sha256()
             with open(image_path, 'rb') as f:
                 m.update(f.read())
-            return m.digest().hex()
-    
+            return m.hexdigest()
+            # return m.digest().hex()
+
     @classmethod
     def validate_inputs(cls, image_path_or_URL="", image=""):
-        """Validate inputs for VALIDATE_INPUTS method"""
         if not image_path_or_URL and (not image or image == ""):
             return True
-            
         if image_path_or_URL:
             return True
-        
         if not folder_paths.exists_annotated_filepath(image):
             return f"Invalid image file: {image}"
-        
         return True
 
     def process_image_to_tensor(self, img):
-        """Convert PIL image to tensor with proper format"""
         if img is None:
             return None
-            
+
         img_rgb = img.convert('RGB')
         output_images = []
-        
+
         for i in ImageSequence.Iterator(img_rgb):
             i = ImageOps.exif_transpose(i)
+
             if i.mode == 'I':
                 i = i.point(lambda i: i * (1 / 255))
-            
             if i.mode != 'RGB':
                 i = i.convert('RGB')
-            
+
             image = np.array(i).astype(np.float32) / 255.0
             if len(image.shape) == 3:
                 image = torch.from_numpy(image)[None,]
             else:
-                image = torch.from_numpy(image).unsqueeze(0)  # Add batch dimension
+                image = torch.from_numpy(image).unsqueeze(0)
             output_images.append(image)
-        
-        if len(output_images) > 1:
-            return torch.cat(output_images, dim=0)
+
+        return torch.cat(output_images, dim=0) if len(output_images) > 1 else output_images[0]
+
+    def resize_image_to_target(self, image, megapixels=0.0, scale_by=1.0, size=0, resize_mode="longest_side", resampling=Image.LANCZOS):
+        orig_width, orig_height = image.size
+
+        if megapixels > 0:
+            aspect_ratio = orig_width / orig_height
+            target_pixels = int(megapixels * 1024 * 1024)
+            final_height = int((target_pixels / aspect_ratio) ** 0.5)
+            final_width = int(aspect_ratio * final_height)
+            
+            if final_width != orig_width or final_height != orig_height:
+                image = image.resize((final_width, final_height), resampling)
+            return image, final_width, final_height
+
+        target_w, target_h = orig_width, orig_height
+
+        if size > 0:
+            if resize_mode == "longest_side":
+                if orig_width >= orig_height:
+                    target_w = size
+                    target_h = int(orig_height * (size / orig_width))
+                else:
+                    target_h = size
+                    target_w = int(orig_width * (size / orig_height))
+            elif resize_mode == "shortest_side":
+                if orig_width <= orig_height:
+                    target_w = size
+                    target_h = int(orig_height * (size / orig_width))
+                else:
+                    target_h = size
+                    target_w = int(orig_width * (size / orig_height))
+            elif resize_mode == "width":
+                target_w = size
+                target_h = int(orig_height * (size / orig_width))
+            elif resize_mode == "height":
+                target_h = size
+                target_w = int(orig_width * (size / orig_height))
+
+        if scale_by != 1.0:
+            target_w = int(target_w * scale_by)
+            target_h = int(target_h * scale_by)
+
+        if target_w != orig_width or target_h != orig_height:
+            image = image.resize((target_w, target_h), resampling)
+
+        return image, target_w, target_h
+
+    def process_and_resize_image(self, img, mask_channel="alpha", resampling=Image.LANCZOS,
+                             megapixels=0.0, scale_by=1.0, size=0, resize_mode="longest_side",
+                             advanced_mask=False):
+
+        resized_img, width, height = self.resize_image_to_target(img, megapixels=megapixels, scale_by=scale_by, size=size, resize_mode=resize_mode, resampling=resampling)
+
+        img_rgb = resized_img.convert("RGB")
+
+        mask = None
+        if advanced_mask:
+            if mask_channel == "alpha" and "A" in resized_img.getbands():
+                mask = np.array(resized_img.getchannel("A")).astype(np.float32) / 255.0
+            elif mask_channel == "red":
+                mask = np.array(img_rgb.getchannel("R")).astype(np.float32) / 255.0
+            elif mask_channel == "green":
+                mask = np.array(img_rgb.getchannel("G")).astype(np.float32) / 255.0
+            elif mask_channel == "blue":
+                mask = np.array(img_rgb.getchannel("B")).astype(np.float32) / 255.0
         else:
-            return output_images[0]
+            if "A" in resized_img.getbands():
+                mask = np.array(resized_img.getchannel("A")).astype(np.float32) / 255.0
+
+        if mask is None:
+            mask = np.ones((height, width), dtype=np.float32)
+
+        image_tensor = self.process_image_to_tensor(img_rgb)
+        mask_tensor = torch.from_numpy(mask).unsqueeze(0)
+
+        if advanced_mask:
+            mask_image = mask_tensor.reshape((-1, 1, height, width)).movedim(1, -1).expand(-1, -1, -1, 3)
+        else:
+            mask_image = None
+
+        return image_tensor, mask_tensor, mask_image, width, height
+
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        return cls.calculate_hash(kwargs.get("image_path_or_URL", ""), kwargs.get("image", ""))
+
+    @classmethod
+    def VALIDATE_INPUTS(cls, **kwargs):
+        return cls.validate_inputs(kwargs.get("image_path_or_URL", ""), kwargs.get("image", ""))
 
 # Simple image loader node (basic functionality)
 class AILab_LoadImageSimple(AILab_BaseImageLoader):
@@ -731,8 +823,8 @@ class AILab_LoadImageSimple(AILab_BaseImageLoader):
         }
 
     CATEGORY = "🧪AILab/🖼️IMAGE"
-    RETURN_TYPES = ("IMAGE", "INT", "INT")
-    RETURN_NAMES = ("IMAGE", "WIDTH", "HEIGHT")
+    RETURN_TYPES = ("IMAGE", "MASK", "INT", "INT")
+    RETURN_NAMES = ("IMAGE", "MASK", "WIDTH", "HEIGHT")
     FUNCTION = "load_image"
     OUTPUT_NODE = False
 
@@ -741,49 +833,47 @@ class AILab_LoadImageSimple(AILab_BaseImageLoader):
             img = self.get_image(image_path_or_URL, image)
 
             if img is None:
-                print("No image input provided, returning empty image")
+                print("No image input provided, returning empty image and mask")
                 empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-                return (empty_image, 64, 64)
+                empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
+                return (empty_image, empty_mask, 64, 64)
             
             width, height = img.size
             output_image = self.process_image_to_tensor(img)
             
-            return (output_image, width, height)
+            mask = None
+            if 'A' in img.getbands():
+                mask_np = np.array(img.getchannel('A')).astype(np.float32) / 255.0
+                mask = torch.from_numpy(mask_np).unsqueeze(0)
+            else:
+                mask = torch.ones((1, height, width), dtype=torch.float32)
+            
+            return (output_image, mask, width, height)
             
         except Exception as e:
-            import traceback
             traceback.print_exc()
-            print(f"Error loading image: {e}")
             empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-            return (empty_image, 64, 64)
-    
-    @classmethod
-    def IS_CHANGED(cls, image_path_or_URL="", image="", extra_pnginfo=None):
-        return cls.calculate_hash(image_path_or_URL, image)
-    
-    @classmethod
-    def VALIDATE_INPUTS(cls, image_path_or_URL="", image="", extra_pnginfo=None):
-        return cls.validate_inputs(image_path_or_URL, image)
+            empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
+            return (empty_image, empty_mask, 64, 64)
 
 # Standard image loader node (with resize and basic mask)
 class AILab_LoadImage(AILab_BaseImageLoader):
     upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "lanczos"]
-    
+
     @classmethod
     def INPUT_TYPES(cls):
         files = cls.get_image_files()
         return {
             "required": {
-                "image_path_or_URL": ("STRING", {"default": "","placeholder": "Local path, network path or URL"}),
-                "image": ([""] + sorted(files) if files else [""], {"image_upload": True}),
-                "upscale_method": (cls.upscale_methods, {"default": "lanczos", "tooltip": "Method used for resizing the image"}),
-                "scale_by": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 8.0, "step": 0.01, "tooltip": "Scale image by this factor (ignored if size > 0)"}),
-                "resize_mode": (["longest_side", "shortest_side", "width", "height"], {"default": "longest_side", "tooltip": "Choose how to resize the image"}),
-                "size": ("INT", {"default": 0, "min": 0, "max": MAX_RESOLUTION, "step": 1, "tooltip": "Target size for the selected resize mode (0 = keep original size)"}),
+                "image_path_or_URL": ("STRING", {"default": "", "placeholder": "Local path or URL"}),
+                "image": ([""] + sorted(files), {"image_upload": True}),
+                "upscale_method": (cls.upscale_methods, {"default": "lanczos"}),
+                "megapixels": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 16.0, "step": 0.01}),
+                "scale_by": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 8.0, "step": 0.01}),
+                "resize_mode": (["longest_side", "shortest_side", "width", "height"], {"default": "longest_side"}),
+                "size": ("INT", {"default": 0, "min": 0, "max": MAX_RESOLUTION}),
             },
-            "hidden": {
-                "extra_pnginfo": "EXTRA_PNGINFO",
-            },
+            "hidden": {"extra_pnginfo": "EXTRA_PNGINFO"},
         }
 
     CATEGORY = "🧪AILab/🖼️IMAGE"
@@ -792,250 +882,90 @@ class AILab_LoadImage(AILab_BaseImageLoader):
     FUNCTION = "load_image"
     OUTPUT_NODE = False
 
-    def load_image(self, image_path_or_URL="", image="", upscale_method="lanczos", scale_by=1.0, 
-                  resize_mode="longest_side", size=0, extra_pnginfo=None):
+    def load_image(self, image_path_or_URL="", image="", upscale_method="lanczos", megapixels=0.0,
+                   scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
         try:
             img = self.get_image(image_path_or_URL, image)
-            
             if img is None:
-                empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-                empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
-                return (empty_image, empty_mask, 64, 64)
-            
-            orig_width, orig_height = img.size
-            
-            resampling_map = {
+                raise ValueError("Image is None")
+
+            resampling = {
                 "nearest-exact": Image.NEAREST,
                 "bilinear": Image.BILINEAR,
                 "area": Image.BOX,
                 "bicubic": Image.BICUBIC,
                 "lanczos": Image.LANCZOS
-            }
-            resampling = resampling_map.get(upscale_method, Image.LANCZOS)
+            }.get(upscale_method, Image.LANCZOS)
 
-            has_alpha = 'A' in img.getbands()
-            if has_alpha:
-                original_alpha = img.getchannel('A')
-            
-            img_rgb = img.convert('RGB')
-         
-            if size > 0:
-                if resize_mode == "longest_side":
-                    if orig_width >= orig_height:
-                        new_width = size
-                        new_height = int(orig_height * (size / orig_width))
-                    else:
-                        new_height = size
-                        new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "shortest_side":
-                    if orig_width <= orig_height:
-                        new_width = size
-                        new_height = int(orig_height * (size / orig_width))
-                    else:
-                        new_height = size
-                        new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "width":
-                    new_width = size
-                    new_height = int(orig_height * (size / orig_width))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "height":
-                    new_height = size
-                    new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-            elif scale_by != 1.0:
-                new_width = int(orig_width * scale_by)
-                new_height = int(orig_height * scale_by)
-                img_rgb = img_rgb.resize((new_width, new_height), resampling)
-            
-            width, height = img_rgb.size
+            image_tensor, mask_tensor, _, width, height = self.process_and_resize_image(
+                img, resampling=resampling, megapixels=megapixels, scale_by=scale_by,
+                size=size, resize_mode=resize_mode, advanced_mask=False
+            )
+            return image_tensor, mask_tensor, width, height
 
-            mask = None
-            if has_alpha:
-                if size > 0 or scale_by != 1.0:
-                    mask_img = original_alpha.resize((width, height), resampling)
-                else:
-                    mask_img = original_alpha
-                mask = np.array(mask_img).astype(np.float32) / 255.0
-                mask = torch.from_numpy(mask)
-                if len(mask.shape) == 2:
-                    mask = mask.unsqueeze(0)
-            else:
-                mask = torch.ones((1, height, width), dtype=torch.float32)
-            
-            output_image = self.process_image_to_tensor(img_rgb)
-            
-            return (output_image, mask, width, height)
-            
         except Exception as e:
-            import traceback
             traceback.print_exc()
-            print(f"Error loading image: {e}")
-            empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-            empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
-            return (empty_image, empty_mask, 64, 64)
-    
-    @classmethod
-    def IS_CHANGED(cls, image_path_or_URL="", image="", upscale_method="lanczos", scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
-        return cls.calculate_hash(image_path_or_URL, image)
-    
-    @classmethod
-    def VALIDATE_INPUTS(cls, image_path_or_URL="", image="", upscale_method="lanczos", scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
-        return cls.validate_inputs(image_path_or_URL, image)
+            empty_image = torch.zeros((1, 64, 64, 3))
+            empty_mask = torch.zeros((1, 64, 64))
+            return empty_image, empty_mask, 64, 64
 
-# Advanced image loader node (with full mask processing)
+# Advanced image loader node (with full mask processing AND metadata output)
 class AILab_LoadImageAdvanced(AILab_BaseImageLoader):
     upscale_methods = ["nearest-exact", "bilinear", "area", "bicubic", "lanczos"]
-    
+
     @classmethod
     def INPUT_TYPES(cls):
         files = cls.get_image_files()
         return {
             "required": {
-                "image_path_or_URL": ("STRING", {"default": "","placeholder": "Local path, network path or URL"}),
-                "image": ([""] + sorted(files) if files else [""], {"image_upload": True}),
-                "mask_channel": (["alpha", "red", "green", "blue"], {"default": "alpha", "tooltip": "Select channel to extract mask from"}),
-                "upscale_method": (cls.upscale_methods, {"default": "lanczos", "tooltip": "Method used for resizing the image"}),
-                "scale_by": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 8.0, "step": 0.01, "tooltip": "Scale image by this factor (ignored if size > 0)"}),
-                "resize_mode": (["longest_side", "shortest_side", "width", "height"], {"default": "longest_side", "tooltip": "Choose how to resize the image"}),
-                "size": ("INT", {"default": 0, "min": 0, "max": MAX_RESOLUTION, "step": 1, "tooltip": "Target size for the selected resize mode (0 = keep original size)"}),
+                "image_path_or_URL": ("STRING", {"default": "", "placeholder": "Local path or URL"}),
+                "image": ([""] + sorted(files), {"image_upload": True}),
+                "mask_channel": (["alpha", "red", "green", "blue"], {"default": "alpha"}),
+                "upscale_method": (cls.upscale_methods, {"default": "lanczos"}),
+                "megapixels": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 16.0, "step": 0.01}),
+                "scale_by": ("FLOAT", {"default": 1.0, "min": 0.01, "max": 8.0, "step": 0.01}),
+                "resize_mode": (["longest_side", "shortest_side", "width", "height"], {"default": "longest_side"}),
+                "size": ("INT", {"default": 0, "min": 0, "max": MAX_RESOLUTION}),
             },
-            "hidden": {
-                "extra_pnginfo": "EXTRA_PNGINFO",
-            },
+            "hidden": {"extra_pnginfo": "EXTRA_PNGINFO"},
         }
 
     CATEGORY = "🧪AILab/🖼️IMAGE"
-    RETURN_TYPES = ("IMAGE", "MASK", "IMAGE", "INT", "INT")
-    RETURN_NAMES = ("IMAGE", "MASK", "MASK_IMAGE", "WIDTH", "HEIGHT")
+    RETURN_TYPES = ("IMAGE", "MASK", "IMAGE", "INT", "INT", "STRING")
+    RETURN_NAMES = ("IMAGE", "MASK", "MASK_IMAGE", "WIDTH", "HEIGHT", "METADATA")
     FUNCTION = "load_image"
     OUTPUT_NODE = False
 
-    def load_image(self, image_path_or_URL="", image="", mask_channel="alpha", upscale_method="lanczos", scale_by=1.0, 
-                  resize_mode="longest_side", size=0, extra_pnginfo=None):
+    def load_image(self, image_path_or_URL="", image="", mask_channel="alpha", upscale_method="lanczos", megapixels=0.0,
+                   scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
         try:
             img = self.get_image(image_path_or_URL, image)
-            
             if img is None:
-                empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-                empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
-                empty_mask_image = empty_mask.reshape((-1, 1, 64, 64)).movedim(1, -1).expand(-1, -1, -1, 3)
-                return (empty_image, empty_mask, empty_mask_image, 64, 64)
-            
-            orig_width, orig_height = img.size
-            
-            resampling_map = {
+                raise ValueError("Image is None")
+  
+            metadata_text = self.get_metadata(img)
+
+            resampling = {
                 "nearest-exact": Image.NEAREST,
                 "bilinear": Image.BILINEAR,
                 "area": Image.BOX,
                 "bicubic": Image.BICUBIC,
                 "lanczos": Image.LANCZOS
-            }
-            resampling = resampling_map.get(upscale_method, Image.LANCZOS)
-            
-            has_alpha = 'A' in img.getbands()
-            if has_alpha and mask_channel == "alpha":
-                original_alpha = img.getchannel('A')
-            
-            img_rgb = img.convert('RGB')
-            
-            if size > 0:
-                if resize_mode == "longest_side":
-                    if orig_width >= orig_height:
-                        new_width = size
-                        new_height = int(orig_height * (size / orig_width))
-                    else:
-                        new_height = size
-                        new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "shortest_side":
-                    if orig_width <= orig_height:
-                        new_width = size
-                        new_height = int(orig_height * (size / orig_width))
-                    else:
-                        new_height = size
-                        new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "width":
-                    new_width = size
-                    new_height = int(orig_height * (size / orig_width))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-                elif resize_mode == "height":
-                    new_height = size
-                    new_width = int(orig_width * (size / orig_height))
-                    img_rgb = img_rgb.resize((new_width, new_height), resampling)
-            elif scale_by != 1.0:
-                new_width = int(orig_width * scale_by)
-                new_height = int(orig_height * scale_by)
-                img_rgb = img_rgb.resize((new_width, new_height), resampling)
-            
-            width, height = img_rgb.size
-            
-            mask = None
-            if mask_channel == "alpha" and has_alpha:
-                if (size > 0 or scale_by != 1.0) and 'original_alpha' in locals():
-                    mask_img = original_alpha.resize((width, height), resampling)
-                    mask = np.array(mask_img).astype(np.float32) / 255.0
-                    mask = 1. - torch.from_numpy(mask)
-            
-            output_images = []
-            output_masks = []
-            
-            for i in ImageSequence.Iterator(img_rgb):
-                i = ImageOps.exif_transpose(i)
-                if i.mode == 'I':
-                    i = i.point(lambda i: i * (1 / 255))
-                
-                if i.mode != 'RGB':
-                    i = i.convert('RGB')
-                
-                image = np.array(i).astype(np.float32) / 255.0
-                image = torch.from_numpy(image)[None,]
-                
-                if mask is not None:
-                    output_masks.append(mask.unsqueeze(0))
-                elif mask_channel == "red" and 'R' in i.getbands():
-                    mask = np.array(i.getchannel('R')).astype(np.float32) / 255.0
-                    output_masks.append(torch.from_numpy(mask).unsqueeze(0))
-                elif mask_channel == "green" and 'G' in i.getbands():
-                    mask = np.array(i.getchannel('G')).astype(np.float32) / 255.0
-                    output_masks.append(torch.from_numpy(mask).unsqueeze(0))
-                elif mask_channel == "blue" and 'B' in i.getbands():
-                    mask = np.array(i.getchannel('B')).astype(np.float32) / 255.0
-                    output_masks.append(torch.from_numpy(mask).unsqueeze(0))
-                else:
-                    output_masks.append(torch.ones((1, height, width), dtype=torch.float32, device="cpu"))
-                
-                output_images.append(image)
-            
-            if len(output_images) > 1:
-                output_image = torch.cat(output_images, dim=0)
-                output_mask = torch.cat(output_masks, dim=0)
-            else:
-                output_image = output_images[0]
-                output_mask = output_masks[0]
-            
-            mask_image = output_mask.reshape((-1, 1, output_mask.shape[-2], output_mask.shape[-1])).movedim(1, -1).expand(-1, -1, -1, 3)
-            
-            return (output_image, output_mask, mask_image, width, height)
-            
+            }.get(upscale_method, Image.LANCZOS)
+
+            image_tensor, mask_tensor, mask_image, width, height = self.process_and_resize_image(
+                img, mask_channel=mask_channel, resampling=resampling, megapixels=megapixels,
+                scale_by=scale_by, size=size, resize_mode=resize_mode, advanced_mask=True
+            )
+
+            return (image_tensor, mask_tensor, mask_image, width, height, metadata_text)
+
         except Exception as e:
-            import traceback
             traceback.print_exc()
-            print(f"Error loading image: {e}")
-            empty_image = torch.zeros((1, 64, 64, 3), dtype=torch.float32)
-            empty_mask = torch.zeros((1, 64, 64), dtype=torch.float32)
+            empty_image = torch.zeros((1, 64, 64, 3))
+            empty_mask = torch.zeros((1, 64, 64))
             empty_mask_image = empty_mask.reshape((-1, 1, 64, 64)).movedim(1, -1).expand(-1, -1, -1, 3)
-            return (empty_image, empty_mask, empty_mask_image, 64, 64)
-    
-    @classmethod
-    def IS_CHANGED(cls, image_path_or_URL="", image="", mask_channel="alpha", upscale_method="lanczos", scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
-        return cls.calculate_hash(image_path_or_URL, image)
-    
-    @classmethod
-    def VALIDATE_INPUTS(cls, image_path_or_URL="", image="", mask_channel="alpha", upscale_method="lanczos", scale_by=1.0, resize_mode="longest_side", size=0, extra_pnginfo=None):
-        return cls.validate_inputs(image_path_or_URL, image)
+            return (empty_image, empty_mask, empty_mask_image, 64, 64, "Error loading image")
 
 # Image combiner node
 class AILab_ImageCombiner:
@@ -2209,7 +2139,7 @@ NODE_CLASS_MAPPINGS = {
 # Node display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
     "AILab_LoadImage": "Load Image (RMBG) 🖼️",
-    "AILab_LoadImageSimple": "Load Image Simple (RMBG) 🖼️",
+    "AILab_LoadImageSimple": "Load Image Basic (RMBG) 🖼️",
     "AILab_LoadImageAdvanced": "Load Image Advanced (RMBG) 🖼️",
     "AILab_Preview": "Image / Mask Preview (RMBG) 🖼️🎭",
     "AILab_MaskOverlay": "Mask Overlay (RMBG) 🖼️🎭",
