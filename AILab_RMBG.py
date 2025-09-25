@@ -531,7 +531,8 @@ class RMBG:
             "background": "Choose output type: Alpha (transparent) or Color (custom background color).",
             "background_color": "Pick background color (supports alpha, use color picker).",
             "invert_output": "Enable to invert both the image and mask output (useful for certain effects).",
-            "refine_foreground": "Use Fast Foreground Colour Estimation to optimize transparent background"
+            "refine_foreground": "Use Fast Foreground Colour Estimation to optimize transparent background",
+            "chunk_size": "Set chunk size for batch processing (higher values may speed up processing but require more VRAM)."
         }
         
         return {
@@ -548,6 +549,7 @@ class RMBG:
                 "refine_foreground": ("BOOLEAN", {"default": False, "tooltip": tooltips["refine_foreground"]}),
                 "background": (["Alpha", "Color"], {"default": "Alpha", "tooltip": tooltips["background"]}),
                 "background_color": ("COLOR", {"default": "#222222", "tooltip": tooltips["background_color"]}),
+                "chunk_size": ([1, 2, 4], {"default": 4, "tooltip": tooltips["chunk_size"]}),
             }
         }
 
@@ -640,7 +642,7 @@ class RMBG:
             
             if model_type in ("rmbg", "ben2"):
                 images_list = [img for img in image]
-                chunk_size = 4
+                chunk_size = params.get("chunk_size", 4)
                 for start in range(0, len(images_list), chunk_size):
                     batch_imgs = images_list[start:start + chunk_size]
                     masks = model_instance.process_image(batch_imgs, model, params)
