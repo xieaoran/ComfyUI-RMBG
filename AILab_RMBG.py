@@ -32,6 +32,7 @@ import cv2
 import types
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+offload_device = "cpu"
 
 folder_paths.add_model_folder_path("rmbg", os.path.join(folder_paths.models_dir, "RMBG"))
 
@@ -236,12 +237,13 @@ class RMBGModel(BaseModelLoader):
                 param.requires_grad = False
 
             torch.set_float32_matmul_precision('high')
-            self.model.to(device)
+            self.model.to(offload_device)
             self.current_model_version = model_name
             
     def process_image(self, images, model_name, params):
         try:
             self.load_model(model_name)
+            self.model.to(device)
 
             # Prepare batch processing
             transform_image = transforms.Compose([
@@ -294,7 +296,7 @@ class RMBGModel(BaseModelLoader):
                                          mode='bilinear').squeeze()
                     
                     masks.append(tensor2pil(result))
-
+                self.model.to(offload_device)
                 return masks
 
         except Exception as e:
@@ -362,13 +364,14 @@ class BENModel(BaseModelLoader):
                 param.requires_grad = False
             
             torch.set_float32_matmul_precision('high')
-            self.model.to(device)
+            self.model.to(offload_device)
             self.current_model_version = model_name
     
     def process_image(self, image, model_name, params):
         try:
             self.load_model(model_name)
-            
+            self.model.to(device)
+
             orig_image = tensor2pil(image)
             w, h = orig_image.size
             
@@ -384,7 +387,7 @@ class BENModel(BaseModelLoader):
             
             foreground = foreground.resize((w, h), Image.LANCZOS)
             mask = foreground.split()[-1]
-            
+            self.model.to(offload_device)
             return mask
             
         except Exception as e:
@@ -417,7 +420,7 @@ class BEN2Model(BaseModelLoader):
                     param.requires_grad = False
                 
                 torch.set_float32_matmul_precision('high')
-                self.model.to(device)
+                self.model.to(offload_device)
                 self.current_model_version = model_name
                 
             except Exception as e:
@@ -426,6 +429,7 @@ class BEN2Model(BaseModelLoader):
     def process_image(self, images, model_name, params):
         try:
             self.load_model(model_name)
+            self.model.to(device)
             
             if isinstance(images, torch.Tensor):
                 if len(images.shape) == 3:
@@ -468,6 +472,7 @@ class BEN2Model(BaseModelLoader):
             
             if len(all_masks) == 1:
                 return all_masks[0]
+            self.model.to(offload_device)
             return all_masks
 
         except Exception as e:
